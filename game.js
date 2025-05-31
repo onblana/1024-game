@@ -26,6 +26,14 @@ function showGameOver() {
     const gameOverDiv = document.getElementById('game-over');
     gameOverDiv.textContent = 'Game Over';
     gameOverDiv.classList.add('show');
+    // 오버레이가 항상 보드 위에 있도록 append
+    const gameBoard = document.getElementById('game-board');
+    if (gameBoard.lastElementChild !== gameOverDiv) {
+        gameBoard.appendChild(gameOverDiv);
+    }
+    // 오버레이가 보이도록 강제로 reflow 트리거
+    void gameOverDiv.offsetWidth;
+    gameOverDiv.classList.add('show');
 }
 
 function addRandomTile() {
@@ -43,7 +51,10 @@ function addRandomTile() {
 
 function updateBoard(moveInfo) {
     const gameBoard = document.getElementById('game-board');
-    gameBoard.innerHTML = '';
+    // 오버레이를 제외한 타일만 갱신
+    Array.from(gameBoard.children).forEach(child => {
+        if (!child.id || child.id !== 'game-over') gameBoard.removeChild(child);
+    });
     for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {
             const tile = document.createElement('div');
@@ -58,9 +69,11 @@ function updateBoard(moveInfo) {
             gameBoard.appendChild(tile);
         }
     }
-    // 게임오버 오버레이가 항상 보드 위에 있도록 유지
+    // 게임오버 오버레이가 항상 보드 위에 있도록 append
     const gameOverDiv = document.getElementById('game-over');
-    gameBoard.appendChild(gameOverDiv);
+    if (gameBoard.lastElementChild !== gameOverDiv) {
+        gameBoard.appendChild(gameOverDiv);
+    }
 }
 
 function updateScore() {
