@@ -164,7 +164,9 @@ function move(dir) {
         addRandomTile();
         updateBoard({ movedTiles });
         updateScore();
+        // 여기서 lastMove를 null로 초기화하여 두 번째 updateBoard에서 .new가 적용되지 않게 함
         setTimeout(() => {
+            lastMove = null;
             updateBoard();
         }, 180);
         if (isGameOver()) {
