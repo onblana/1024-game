@@ -8,12 +8,24 @@ function initBoard() {
     board = Array.from({ length: size }, () => Array(size).fill(0));
     score = 0;
     gameOver = false;
-    document.getElementById('game-over').classList.remove('show');
-    document.getElementById('game-over').textContent = '';
+    hideGameOver();
     addRandomTile();
     addRandomTile();
     updateBoard();
     updateScore();
+}
+
+function hideGameOver() {
+    const gameOverDiv = document.getElementById('game-over');
+    gameOverDiv.classList.remove('show');
+    gameOverDiv.textContent = '';
+}
+
+function showGameOver() {
+    const gameOverDiv = document.getElementById('game-over');
+    gameOverDiv.textContent = 'Game Over';
+    gameOverDiv.classList.add('show');
+    gameOver = true;
 }
 
 function addRandomTile() {
@@ -31,10 +43,7 @@ function addRandomTile() {
 
 function updateBoard(moveInfo) {
     const gameBoard = document.getElementById('game-board');
-    // 기존 game-over를 유지하고 타일만 갱신
-    Array.from(gameBoard.children).forEach(child => {
-        if (!child.id || child.id !== 'game-over') gameBoard.removeChild(child);
-    });
+    gameBoard.innerHTML = '';
     for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {
             const tile = document.createElement('div');
@@ -43,7 +52,6 @@ function updateBoard(moveInfo) {
             if (moveInfo && moveInfo.movedTiles && moveInfo.movedTiles.some(([mr, mc]) => mr === r && mc === c)) {
                 tile.classList.add('move');
             }
-            // moveInfo가 없을 때만 popTile 적용 (중복 방지)
             if (!moveInfo && lastMove && lastMove.newTile && lastMove.newTile[0] === r && lastMove.newTile[1] === c) {
                 tile.classList.add('new');
             }
@@ -145,10 +153,7 @@ function move(dir) {
         }, 180);
         if (isGameOver()) {
             setTimeout(() => {
-                const gameOverDiv = document.getElementById('game-over');
-                gameOverDiv.textContent = 'Game Over';
-                gameOverDiv.classList.add('show');
-                gameOver = true;
+                showGameOver();
             }, 200);
         } else if (isGameWon()) {
             setTimeout(() => alert('You Win!'), 200);
@@ -167,10 +172,7 @@ document.getElementById('restart').onclick = initBoard;
 
 document.getElementById('test-gameover').onclick = function() {
     if (!gameOver) {
-        const gameOverDiv = document.getElementById('game-over');
-        gameOverDiv.textContent = 'Game Over';
-        gameOverDiv.classList.add('show');
-        gameOver = true;
+        showGameOver();
     }
 };
 
