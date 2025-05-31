@@ -22,10 +22,10 @@ function hideGameOver() {
 }
 
 function showGameOver() {
+    gameOver = true;
     const gameOverDiv = document.getElementById('game-over');
     gameOverDiv.textContent = 'Game Over';
     gameOverDiv.classList.add('show');
-    gameOver = true;
 }
 
 function addRandomTile() {
@@ -58,6 +58,9 @@ function updateBoard(moveInfo) {
             gameBoard.appendChild(tile);
         }
     }
+    // 게임오버 오버레이가 항상 보드 위에 있도록 유지
+    const gameOverDiv = document.getElementById('game-over');
+    gameBoard.appendChild(gameOverDiv);
 }
 
 function updateScore() {
@@ -171,9 +174,7 @@ document.addEventListener('keydown', e => {
 document.getElementById('restart').onclick = initBoard;
 
 document.getElementById('test-gameover').onclick = function() {
-    if (!gameOver) {
-        showGameOver();
-    }
+    showGameOver();
 };
 
 window.onload = initBoard;
