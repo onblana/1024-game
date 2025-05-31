@@ -1,6 +1,7 @@
 const size = 4;
 let board = [];
 let score = 0;
+let lastMove = null;
 
 function initBoard() {
     board = Array.from({ length: size }, () => Array(size).fill(0));
@@ -21,9 +22,10 @@ function addRandomTile() {
     if (empty.length === 0) return;
     let [r, c] = empty[Math.floor(Math.random() * empty.length)];
     board[r][c] = Math.random() < 0.9 ? 2 : 4;
+    lastMove = { newTile: [r, c] };
 }
 
-function updateBoard() {
+function updateBoard(moveInfo) {
     const gameBoard = document.getElementById('game-board');
     gameBoard.innerHTML = '';
     for (let r = 0; r < size; r++) {
@@ -31,6 +33,12 @@ function updateBoard() {
             const tile = document.createElement('div');
             tile.className = `tile tile-${board[r][c]}`;
             tile.textContent = board[r][c] !== 0 ? board[r][c] : '';
+            if (moveInfo && moveInfo.movedTiles && moveInfo.movedTiles.some(([mr, mc]) => mr === r && mc === c)) {
+                tile.classList.add('move');
+            }
+            if (lastMove && lastMove.newTile && lastMove.newTile[0] === r && lastMove.newTile[1] === c) {
+                tile.classList.add('new');
+            }
             gameBoard.appendChild(tile);
         }
     }
@@ -42,14 +50,16 @@ function updateScore() {
 
 function move(dir) {
     let moved = false;
-    let merged = Array.from({ length: size }, () => Array(size).fill(false));
-    function slide(row) {
+    let movedTiles = [];
+    function slide(row, rIdx) {
         let arr = row.filter(x => x !== 0);
+        let merged = Array(arr.length).fill(false);
         for (let i = 0; i < arr.length - 1; i++) {
-            if (arr[i] === arr[i + 1] && arr[i] !== 0) {
+            if (arr[i] === arr[i + 1] && arr[i] !== 0 && !merged[i] && !merged[i + 1]) {
                 arr[i] *= 2;
                 score += arr[i];
                 arr[i + 1] = 0;
+                merged[i] = true;
             }
         }
         arr = arr.filter(x => x !== 0);
@@ -59,15 +69,29 @@ function move(dir) {
     if (dir === 'left') {
         for (let r = 0; r < size; r++) {
             let old = board[r].slice();
-            let newRow = slide(board[r]);
-            if (old.toString() !== newRow.toString()) moved = true;
+            let newRow = slide(board[r], r);
+            if (old.toString() !== newRow.toString()) {
+                moved = true;
+                for (let c = 0; c < size; c++) {
+                    if (old[c] !== 0 && old[c] !== newRow[c]) {
+                        movedTiles.push([r, c]);
+                    }
+                }
+            }
             board[r] = newRow;
         }
     } else if (dir === 'right') {
         for (let r = 0; r < size; r++) {
             let old = board[r].slice();
-            let newRow = slide(board[r].slice().reverse()).reverse();
-            if (old.toString() !== newRow.toString()) moved = true;
+            let newRow = slide(board[r].slice().reverse(), r).reverse();
+            if (old.toString() !== newRow.toString()) {
+                moved = true;
+                for (let c = 0; c < size; c++) {
+                    if (old[c] !== 0 && old[c] !== newRow[c]) {
+                        movedTiles.push([r, c]);
+                    }
+                }
+            }
             board[r] = newRow;
         }
     } else if (dir === 'up') {
@@ -75,8 +99,15 @@ function move(dir) {
             let col = [];
             for (let r = 0; r < size; r++) col.push(board[r][c]);
             let old = col.slice();
-            let newCol = slide(col);
-            if (old.toString() !== newCol.toString()) moved = true;
+            let newCol = slide(col, c);
+            if (old.toString() !== newCol.toString()) {
+                moved = true;
+                for (let r = 0; r < size; r++) {
+                    if (old[r] !== 0 && old[r] !== newCol[r]) {
+                        movedTiles.push([r, c]);
+                    }
+                }
+            }
             for (let r = 0; r < size; r++) board[r][c] = newCol[r];
         }
     } else if (dir === 'down') {
@@ -84,41 +115,31 @@ function move(dir) {
             let col = [];
             for (let r = 0; r < size; r++) col.push(board[r][c]);
             let old = col.slice();
-            let newCol = slide(col.reverse()).reverse();
-            if (old.toString() !== newCol.toString()) moved = true;
+            let newCol = slide(col.reverse(), c).reverse();
+            if (old.toString() !== newCol.toString()) {
+                moved = true;
+                for (let r = 0; r < size; r++) {
+                    if (old[r] !== 0 && old[r] !== newCol[r]) {
+                        movedTiles.push([r, c]);
+                    }
+                }
+            }
             for (let r = 0; r < size; r++) board[r][c] = newCol[r];
         }
     }
     if (moved) {
         addRandomTile();
-        updateBoard();
+        updateBoard({ movedTiles });
         updateScore();
+        setTimeout(() => {
+            updateBoard();
+        }, 180);
         if (isGameOver()) {
-            setTimeout(() => alert('Game Over!'), 100);
+            setTimeout(() => alert('Game Over!'), 200);
         } else if (isGameWon()) {
-            setTimeout(() => alert('You Win!'), 100);
+            setTimeout(() => alert('You Win!'), 200);
         }
     }
-}
-
-function isGameOver() {
-    for (let r = 0; r < size; r++) {
-        for (let c = 0; c < size; c++) {
-            if (board[r][c] === 0) return false;
-            if (c < size - 1 && board[r][c] === board[r][c + 1]) return false;
-            if (r < size - 1 && board[r][c] === board[r + 1][c]) return false;
-        }
-    }
-    return true;
-}
-
-function isGameWon() {
-    for (let r = 0; r < size; r++) {
-        for (let c = 0; c < size; c++) {
-            if (board[r][c] === 1024) return true;
-        }
-    }
-    return false;
 }
 
 document.addEventListener('keydown', e => {
