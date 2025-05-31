@@ -65,11 +65,12 @@ h1 { margin-top: 30px; }
     color: #fff;
     font-size: 3em;
     font-weight: bold;
-    display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10;
     border-radius: 10px;
+    display: flex;
+    pointer-events: none;
 }
 #game-over.show {
     display: flex;
