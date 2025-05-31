@@ -57,3 +57,20 @@ h1 { margin-top: 30px; }
     80% { transform: scale(1.15); }
     100% { transform: scale(1); }
 }
+#game-over {
+    display: none;
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    font-size: 3em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 10px;
+}
+#game-over.show {
+    display: flex;
+}
