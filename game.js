@@ -165,4 +165,13 @@ document.addEventListener('keydown', e => {
 
 document.getElementById('restart').onclick = initBoard;
 
+document.getElementById('test-gameover').onclick = function() {
+    if (!gameOver) {
+        const gameOverDiv = document.getElementById('game-over');
+        gameOverDiv.textContent = 'Game Over';
+        gameOverDiv.classList.add('show');
+        gameOver = true;
+    }
+};
+
 window.onload = initBoard;
