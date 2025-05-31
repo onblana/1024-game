@@ -2,10 +2,13 @@ const size = 4;
 let board = [];
 let score = 0;
 let lastMove = null;
+let gameOver = false;
 
 function initBoard() {
     board = Array.from({ length: size }, () => Array(size).fill(0));
     score = 0;
+    gameOver = false;
+    document.getElementById('game-over').classList.remove('show');
     addRandomTile();
     addRandomTile();
     updateBoard();
@@ -36,7 +39,8 @@ function updateBoard(moveInfo) {
             if (moveInfo && moveInfo.movedTiles && moveInfo.movedTiles.some(([mr, mc]) => mr === r && mc === c)) {
                 tile.classList.add('move');
             }
-            if (lastMove && lastMove.newTile && lastMove.newTile[0] === r && lastMove.newTile[1] === c) {
+            // 애니메이션 버그 수정: newTile은 moveInfo가 없을 때만 popTile 적용
+            if (!moveInfo && lastMove && lastMove.newTile && lastMove.newTile[0] === r && lastMove.newTile[1] === c) {
                 tile.classList.add('new');
             }
             gameBoard.appendChild(tile);
@@ -49,6 +53,7 @@ function updateScore() {
 }
 
 function move(dir) {
+    if (gameOver) return;
     let moved = false;
     let movedTiles = [];
     function slide(row, rIdx) {
@@ -135,7 +140,11 @@ function move(dir) {
             updateBoard();
         }, 180);
         if (isGameOver()) {
-            setTimeout(() => alert('Game Over!'), 200);
+            setTimeout(() => {
+                document.getElementById('game-over').textContent = 'Game Over';
+                document.getElementById('game-over').classList.add('show');
+                gameOver = true;
+            }, 200);
         } else if (isGameWon()) {
             setTimeout(() => alert('You Win!'), 200);
         }
